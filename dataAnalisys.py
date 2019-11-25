@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np
+import csv
 from openpyxl import load_workbook, Workbook
 #"C:/Users/LG/Desktop/world-development-indicators/Indicators.xlsx""Indecators"
 
 List = ["NY.ADJ.AEDU.GN.ZS",
 "NY.GDP.MKTP.CD",
-"SP.DYN.LEOO.IN",
+"SP.DYN.LE00.IN",
 "SH.MED.CMHW.P3",
 "SL.UEM.TOTL.ZS"]
 
@@ -93,13 +94,6 @@ def attrSort(attrlist,keyvalue,filename,saveFileName,sheetName,indecate):
 
 
 
-
-
-
-
-
-
-
 def makeExcel(attr,filename,criteriarow,saveFileName,sheetName):
  wb = Workbook()
  ws = wb.active
@@ -137,9 +131,100 @@ def makeExcel(attr,filename,criteriarow,saveFileName,sheetName):
  indecator2.save(saveFileName)
 
 
-"C:/Users/LG/Desktop/world-development-indicators/Indicators.xlsx""Indecators"
+
+'''
+makeExcel(List,"C:/Users/LG/Desktop/world-development-indicators/Indicators.xlsx",3,"C:/Users/LG/Desktop/world-development-indicators/Indicators2.xlsx","Indicators")
 attrSort(List,[1,4],"C:/Users/LG/Desktop/world-development-indicators/Indicators2.xlsx","C:/Users/LG/Desktop/world-development-indicators/Indicators3.xlsx","Indicators",[3,5])
+'''
+def attrCsv(attrlist,keyvalue,filename,saveFileName,indecate):
+    raw = open(filename, 'r')
+    wraw = open(saveFileName, 'a', newline='')
+    writer = csv.writer(wraw)
+    cooked = csv.reader(raw)
+    for c in cooked:
+     first_row = c
+     break
+    alist = []
+    for i in range(0, len(keyvalue)):
+        alist.append(first_row[keyvalue[i]])
+    for i in range(0,len(attrlist)):
+        alist.append(attrlist[i])
+    writer.writerow(alist)
+
+    sorce_rows = cooked
+    dic = dict()
+    for k in sorce_rows:
+     t1 = k[keyvalue[1]]
+     break
+
+    for k in sorce_rows:
+        key1 = k[keyvalue[0]]
+        key2 = k[keyvalue[1]]
+        key0 = (str(key1)+str(key2))
+        if( key0 in dic):
+            dic[key0][k[indecate[0]]] = k[indecate[1]]
+        else:
+            dic[key0] = {}
+            dic[key0][alist[0]] = key1
+            dic[key0][alist[1]] = key2
+            dic[key0][k[indecate[0]]] = k[indecate[1]]
+        if(t1 != k[keyvalue[1]]):
+            dickey = dic.keys()
+            appvalue = []
+            for i in dickey:
+                for j in alist:
+                    if(j in dic[i] ):
+                      appvalue.append(dic[i][j])
+                    else:
+                      appvalue.append("nan")
+                writer.writerow(appvalue)
+                del appvalue[:]
+            dic = dict()
+            t1 = k[keyvalue[1]]
+
+    dickey = dic.keys()
+    appvalue = []
+    for i in dickey:
+        for j in alist:
+            if (j in dic[i]):
+                appvalue.append(dic[i][j])
+            else:
+                appvalue.append("nan")
+        writer.writerow(appvalue)
+        del appvalue[:]
+
+def makeCsv(filename,saveFileName,sheetName,criteriarow, attr):
+ raw =  open(filename, 'r')
+ wraw = open(saveFileName, 'a', newline='')
+ writer = csv.writer(wraw)
+ cooked = csv.reader(raw)
+
+ wb = Workbook()
+ ws = wb.active
+ ws.title = sheetName
+
+ count = 0;
+ count2 = 0;
+ first = True
+ for n in cooked:
+    count2+=1
+    if (first):
+        writer.writerow(n)
+        first = False
+
+    if (n[criteriarow] in attr):
+        writer.writerow(n)
+        count += 1
+
+    if(count == 500000):
+        wb.close()
+        wb.save(saveFileName)
+        count = 0;
+
+    print(count2)
 
 
 
 
+makeCsv("C:/Users/LG/Desktop/world-development-indicators/Indicators.csv","C:/Users/LG/Desktop/world-development-indicators/Indicators2.csv","Indicators",3,List)
+attrCsv(List,[1,4],"C:/Users/LG/Desktop/world-development-indicators/Indicators2.csv","C:/Users/LG/Desktop/world-development-indicators/Indicators3.csv",[3,5])
