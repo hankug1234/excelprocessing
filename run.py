@@ -3,7 +3,7 @@ from sklearn.model_selection import GridSearchCV
 import dataAnalisys as ana
 from sklearn.cluster import KMeans
 import pandas as pd
-
+import glob
 
 years = []
 for y in range(2000,2019):
@@ -60,31 +60,34 @@ nanCount = ana.selectiveNanOut("C:/Users/LG/Desktop/world-development-indicators
 print(nanCount)
 '''
 # devide contries
+'''
 birthLabel = pd.read_csv("C:/Users/LG/Desktop/world-development-indicators/IndicatorsBrithRateLabel.csv")
 Label = birthLabel['label']
 Label = pd.Series(Label).values
 ana.deviedContry("C:/Users/LG/Desktop/world-development-indicators/Indicators1344-1.csv","C:/Users/LG/Desktop/world-development-indicators","Indicators1344-3-",Label,[0,1,2])
-
+'''
 # preprocessing remove to many nan data columns
 '''
-indicators1344_1 = pd.read_csv("C:/Users/LG/Desktop/world-development-indicators/Indicators1344-1.csv")
-pd.set_option('display.max_rows',10000)
-pd.set_option('display.max_columns',10000)
-print(indicators1344_1.isna().sum())
-s = list(ana.makeCsvSet("C:/Users/LG/Desktop/world-development-indicators/Indicators2000IndicateUnique.csv",1,1))
+devide = glob.glob("C:/Users/LG/Desktop/world-development-indicators\/Indicators1344-3-*.csv")
+count = 0
+for path in devide:
+ indicators1344_1 = pd.read_csv(path)
+ pd.set_option('display.max_rows',10000)
+ pd.set_option('display.max_columns',10000)
+ s = ana.getColumns(path,2,"end")
 
-nans = pd.Series(indicators1344_1.isna().sum()).values
-drop_list = []
-for index in range(2,len(nans)):
-   if(nans[index]>1000):
+ nans = pd.Series(indicators1344_1.isna().sum()).values
+
+ drop_list = []
+ for index in range(2,len(nans)):
+   if(nans[index]>100):
        drop_list.append(s[index-2])
+ ana.selectiveOut(path,"C:/Users/LG/Desktop/world-development-indicators/Indicators1344-3-"+str(count)+"-p.csv",drop_list)
 
-
-ana.selectiveOut("C:/Users/LG/Desktop/world-development-indicators/Indicators1344-1.csv","C:/Users/LG/Desktop/world-development-indicators/Indicators1344-2.csv",drop_list)
-
-
-indicators1344_2 = pd.read_csv("C:/Users/LG/Desktop/world-development-indicators/Indicators1344-2.csv")
-pd.set_option('display.max_rows',10000)
-pd.set_option('display.max_columns',10000)
-print(indicators1344_2.isna().sum())
+ indicators1344_2 = pd.read_csv("C:/Users/LG/Desktop/world-development-indicators/Indicators1344-3-"+str(count)+"-p.csv")
+ pd.set_option('display.max_rows',10000)
+ pd.set_option('display.max_columns',10000)
+ print(indicators1344_2.isna().sum())
+ print(len(list(indicators1344_2.isna().sum())))
+ count+=1
 '''

@@ -311,4 +311,13 @@ def selectiveOut(filename,savefilename,indicators):
             for index in indicsLabel:
                 nr.append(n[index])
             writer.writerow(nr)
+def getColumns(filename,start,end):
+    raw = open(filename,"r")
+    cooked = csv.reader(raw)
+    for n in cooked:
+     columns = n
+     break
+    if(end == "end"):
+        return columns[start:]
+    return columns[start:end]
 
