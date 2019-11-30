@@ -4,14 +4,6 @@ import csv
 from openpyxl import load_workbook, Workbook
 #"C:/Users/LG/Desktop/world-development-indicators/Indicators.xlsx""Indecators"
 
-List = ["NY.ADJ.AEDU.GN.ZS",
-"NY.GDP.MKTP.CD",
-"SP.DYN.LE00.IN",
-"SH.MED.CMHW.P3",
-"SL.UEM.TOTL.ZS"]
-
-keyvalue = [1,4]
-
 def makeList(n,row):
     list = []
     for i in range(0,n):
@@ -193,38 +185,130 @@ def attrCsv(attrlist,keyvalue,filename,saveFileName,indecate):
         writer.writerow(appvalue)
         del appvalue[:]
 
-def makeCsv(filename,saveFileName,sheetName,criteriarow, attr):
+def makeCsv(filename,saveFileName,criteriarow, attr):
  raw =  open(filename, 'r')
  wraw = open(saveFileName, 'a', newline='')
  writer = csv.writer(wraw)
  cooked = csv.reader(raw)
 
- wb = Workbook()
- ws = wb.active
- ws.title = sheetName
-
- count = 0;
- count2 = 0;
  first = True
  for n in cooked:
-    count2+=1
     if (first):
         writer.writerow(n)
         first = False
 
     if (n[criteriarow] in attr):
         writer.writerow(n)
-        count += 1
 
-    if(count == 500000):
-        wb.close()
-        wb.save(saveFileName)
-        count = 0;
+def makeCsvUnique(filename,saveFileName,criteriarow):
+ raw =  open(filename, 'r')
+ wraw = open(saveFileName, 'a', newline='')
+ writer = csv.writer(wraw)
+ cooked = csv.reader(raw)
+ attrSet = set()
+ first = True
+ for n in cooked:
+    if (first):
+        writer.writerow(n[2:4])
+        first = False
 
-    print(count2)
+    elif (n[criteriarow] not in attrSet):
+        writer.writerow(n[2:4])
+        attrSet.add(n[criteriarow])
+
+def makeCsvSet(filename,criteriarow,num):
+ raw =  open(filename, 'r')
+ cooked = csv.reader(raw)
+ attrlist = []
+ count = 0
+ for n in cooked:
+    if (count<num):
+        count+=1;
+
+    elif (n[criteriarow] not in attrlist):
+        attrlist.append(n[criteriarow])
+ return attrlist
+
+def deviedContry(filename,savefilepath,savefilename,labels,label):
+    raw = open(filename,"r")
+    cooked = csv.reader(raw)
+    writer = []
+    saveIndex = label
+    for index in saveIndex:
+        wraw = open(savefilepath+"/"+savefilename+str(index)+".csv","a",newline='')
+        writer.append(csv.writer(wraw))
+    for n in cooked:
+        for w in writer:
+            w.writerow(n)
+        break
+    for (n,l) in zip(cooked,labels):
+        writer[l].writerow(n)
 
 
+def makeLabeling(filename,saveFileName,label):
+ raw =  open(filename, 'r')
+ wraw = open(saveFileName, 'a', newline='')
+ writer = csv.writer(wraw)
+ cooked = csv.reader(raw)
+ count = 0;
+ first = True
+ for n in cooked:
+    if (first):
+        n.append('label')
+        writer.writerow(n)
+        first = False
 
+    else:
+        n.append(label[count])
+        writer.writerow(n)
+        count+=1
 
-makeCsv("C:/Users/LG/Desktop/world-development-indicators/Indicators.csv","C:/Users/LG/Desktop/world-development-indicators/Indicators2.csv","Indicators",3,List)
-attrCsv(List,[1,4],"C:/Users/LG/Desktop/world-development-indicators/Indicators2.csv","C:/Users/LG/Desktop/world-development-indicators/Indicators3.csv",[3,5])
+def selectiveNanOut(filename,savefilename,indicators):
+    raw = open(filename,"r")
+    wraw = open(savefilename,"a", newline='')
+    writer = csv.writer(wraw)
+    cooked = csv.reader(raw)
+    first = True
+    writeState = True
+    count = 0
+    indicsLabel = []
+    for n in cooked:
+        if(first):
+            writer.writerow(n)
+            first = False
+            for index in range(0,len(n)):
+                if(n[index] in indicators):
+                    indicsLabel.append(index)
+        else:
+            for indicator in indicsLabel:
+                if(n[indicator] == 'nan'):
+                    count+=1
+                    writeState = False
+                    break
+            if(writeState):
+                writer.writerow(n)
+            writeState = True
+    return count
+
+def selectiveOut(filename,savefilename,indicators):
+    raw = open(filename,"r")
+    wraw = open(savefilename,"a", newline='')
+    writer = csv.writer(wraw)
+    cooked = csv.reader(raw)
+    first = True
+    indicsLabel = []
+    for n in cooked:
+        if(first):
+            nr = []
+            for index in range(0,len(n)):
+                if(n[index] not in indicators):
+                    nr.append(n[index])
+                    indicsLabel.append(index)
+            writer.writerow(nr)
+            first = False
+        else:
+            nr = []
+            for index in indicsLabel:
+                nr.append(n[index])
+            writer.writerow(nr)
+
