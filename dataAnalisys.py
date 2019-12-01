@@ -321,3 +321,18 @@ def getColumns(filename,start,end):
         return columns[start:]
     return columns[start:end]
 
+def score(labels,label):
+    dict = {}
+    for key in label:
+        dict[key] = 0
+    for n in labels:
+        dict[n]+=1
+    result = dict.values()
+    re = max(result)
+    return re/len(labels)
+
+def writeToCsv(data,filename):
+    w = open(filename,"a",newline='')
+    writor = csv.writer(w)
+    for d in data:
+        writor.writerow(d)

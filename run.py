@@ -91,3 +91,44 @@ for path in devide:
  print(len(list(indicators1344_2.isna().sum())))
  count+=1
 '''
+#clustering
+data = pd.read_csv("C:/Users/LG/Documents/카카오톡 받은 파일\평균값으로 nan 메꾸기 에다가 빈칸도 메꾸기/indicators1344-3-0-p(updated2).csv")
+data = data.drop(columns=["CountryCode","Year","SP.DYN.CBRT.IN"])
+sub = pd.DataFrame(data)
+
+dataColumns = ana.getColumns("C:/Users/LG/Documents/카카오톡 받은 파일\평균값으로 nan 메꾸기 에다가 빈칸도 메꾸기/indicators1344-3-0-p(updated2).csv",2,"end")
+dataColumns.remove("SP.DYN.CBRT.IN")
+
+entireResult = []
+best = 0.0
+model = KMeans(n_clusters = 2, n_init=25,max_iter=80)
+model.fit(sub)
+best = ana.score(model.labels_,list(set(model.labels_)))
+nraws = [x for x in dataColumns]
+nraws.append(best)
+
+entireResult.append(nraws)
+original = data
+originalColumns = [x for x in dataColumns]
+for d in dataColumns:
+    test = original.drop(columns=[d])
+    testColumns = ["nan" if x == d else x for x in originalColumns]
+    sub = pd.DataFrame(test)
+    model = KMeans(n_clusters = 2, n_init=25,max_iter=80)
+    model.fit(sub)
+    current = ana.score(model.labels_,list(set(model.labels_)))
+    testColumns.append(current)
+    entireResult.append(testColumns)
+    if(current>=best):
+        best = current
+        originalColumns = testColumns[:-1]
+        original = test
+print(best)
+print(originalColumns)
+ana.writeToCsv(entireResult,"C:/Users/LG/Desktop/world-development-indicators/indicators1344-3-0-end.csv")
+
+
+
+
+
+
