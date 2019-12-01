@@ -336,3 +336,13 @@ def writeToCsv(data,filename):
     writor = csv.writer(w)
     for d in data:
         writor.writerow(d)
+
+def writeSpecificToCsv(data,filename,source):
+    r = open(source,"r")
+    w = open(filename,"a",newline='')
+    reader = csv.reader(r)
+    writor = csv.writer(w)
+    for d in reader:
+      for n in data:
+          if(n in d):
+              writor.writerow(d)
